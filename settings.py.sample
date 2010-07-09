@@ -1,0 +1,14 @@
+
+# Password to access user list and status
+ADMIN_PASSWORD = 'pouetpouet'
+
+# The bot jabber account
+JABBER_DOMAIN = 'gmail.com'
+JABBER_HOST = 'talk.google.com'
+JABBER_PORT = 5222
+JABBER_USER = 'testeur'
+JABBER_PWD = 'blabla'
+
+# The bot http server
+HTTP_HOST = '0.0.0.0'
+HTTP_PORT = 5225
