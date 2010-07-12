@@ -106,7 +106,7 @@ class HTTPJabberGateway(BaseHTTPServer.BaseHTTPRequestHandler):
 
   def ImgResponse(self, inImg):
     ext = os.path.splitext(inImg)[1][1:].lower()
-    if os.path.realpath(inImg).startwith(os.path.realpath(settings.STATIC_DIR)):
+    if os.path.realpath(inImg).startswith(os.path.realpath(settings.STATIC_DIR)):
         data = open(inImg, 'rb').read()
         self.send_response(200)
         self.send_header("Content-type", 'image/%s' % ext)
@@ -119,7 +119,7 @@ class HTTPJabberGateway(BaseHTTPServer.BaseHTTPRequestHandler):
         'JABBER_USER':'%s@%s' % (settings.JABBER_USER, settings.JABBER_DOMAIN)
         ,'OFFLINE_IMG':settings.OFFLINE_IMG
     }
-    if os.path.realpath(file).startwith(os.path.realpath(settings.STATIC_DIR)):
+    if os.path.realpath(file).startswith(os.path.realpath(settings.STATIC_DIR)):
         data = open(file, 'r').read()
         data = data % context
         self.send_response(200)
