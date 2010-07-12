@@ -106,19 +106,37 @@ class HTTPJabberGateway(BaseHTTPServer.BaseHTTPRequestHandler):
 
   def ImgResponse(self, inImg):
     ext = os.path.splitext(inImg)[1][1:].lower()
-    data = open(inImg, 'rb').read()
-    self.send_response(200)
-    self.send_header("Content-type", 'image/%s' % ext)
-    self.send_header("Content-length", len(data))
-    self.end_headers()
+    if os.path.realpath(inImg).startwith(os.path.realpath(settings.STATIC_DIR)):
+        data = open(inImg, 'rb').read()
+        self.send_response(200)
+        self.send_header("Content-type", 'image/%s' % ext)
+        self.send_header("Content-length", len(data))
+        self.end_headers()
+        self.wfile.write(data)
     
-    self.wfile.write(data)
-    
+  def HtmlResponse(self, file):
+    context = {
+        'JABBER_USER':'%s@%s' % (settings.JABBER_USER, settings.JABBER_DOMAIN)
+        ,'OFFLINE_IMG':settings.OFFLINE_IMG
+    }
+    if os.path.realpath(file).startwith(os.path.realpath(settings.STATIC_DIR)):
+        data = open(file, 'r').read()
+        data = data % context
+        self.send_response(200)
+        self.send_header("Content-type", 'text/html')
+        self.send_header("Content-length", len(data))
+        self.end_headers()
+        self.wfile.write(data)
+        
   def do_GET(self):
-    path = self.path[:self.path.find('?')]
+    isqs = self.path.find('?')    
+    path = self.path
+    if isqs > -1:
+        path = isqs[:isqs]
     qs = self.path[self.path.find('?')+1:]
     qs = cgi.parse_qs(qs)
     
+   # print path, qs
     #
     # /users?pwd=ADMIN_PASSWORD
     # /user/test@revolunet.com?pwd=ADMIN_PASSWORD
@@ -130,38 +148,51 @@ class HTTPJabberGateway(BaseHTTPServer.BaseHTTPRequestHandler):
         if path == '/users':
             # list known users
             data = self.jabberCon.getStatus()
-            self.JsonResponse({'users':data})
+            return self.JsonResponse({'users':data})
         elif path == '/send':
             # send msg to specific user
-            jid = qs.get('jid',[''])[0]
+            jid = qs.get('jid',[''])[0].lower()
             msg = qs.get('msg',[''])[0]
             self.jabberCon.sendMsg( jid, msg)
-            self.JsonResponse({'success':True})
-        elif path.startswith('/user/'):
-            # display user status
-            paths = path[1:].split('/')
-            jid = paths[-1]
-            data = self.jabberCon.getUserStatus(jid)
-            self.JsonResponse({'status':data})
-        elif path.startswith('/status'):
-            # display user(s) status with an icon
-            paths = path[1:].split('/')
-            if len(paths) == 2:
-                # specific user
-                
-                users = paths[-1].split(',')
-                online = False
-                for jid in users:
-                    if self.jabberCon.getUserStatus(jid) == 'online':
-                        online = True
-                if online == True:
-                    self.ImgResponse( settings.ONLINE_IMG )
-                else:
-                    self.ImgResponse( settings.OFFLINE_IMG )
-            
-       
-        
-    self.JsonResponse({'success':False})
+            return self.JsonResponse({'success':True})
+    elif path.startswith('/user/'):
+        # display user status
+        paths = path[1:].split('/')
+        jid = paths[-1].lower()
+        data = self.jabberCon.getUserStatus(jid)
+        return self.JsonResponse({'status':data})
+    elif path.startswith('/status/'):
+        # display user(s) status with an icon
+        paths = path[1:].split('/')
+        if len(paths) == 2:
+            # specific user
+            users = paths[-1].split(',')
+            online = False
+            for jid in users:
+                #print "check", jid
+                jid = jid.lower()
+                if self.jabberCon.getUserStatus(jid) == 'online':
+                    online = True
+            if online == True:
+                return self.ImgResponse( settings.ONLINE_IMG )
+            else:
+                return self.ImgResponse( settings.OFFLINE_IMG )
+        else:
+            self.JsonResponse({'success':False})
+    elif path.startswith('/static/'):
+        file = path[8:]
+        file = file.replace('..', '')
+        file = file.replace('/', '')
+        file = file.replace('\\', '')
+      #  print 'read ', file
+        ext = file.lower()[file.rfind('.')+1:]
+        if ext in 'jpg,jpeg,gif,png'.split(','):
+                return self.ImgResponse( os.path.join(settings.STATIC_DIR, file) )
+        elif ext in 'html,htm'.split(','):
+                return self.HtmlResponse( os.path.join(settings.STATIC_DIR, file) )
+    else:
+        return self.HtmlResponse( os.path.join(settings.STATIC_DIR, 'home.html') )
+
     return True
 
 def start():

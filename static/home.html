@@ -1,0 +1,26 @@
+<title>status.revolunet.com presence bot</title>
+<style>
+ body {font-size: 16px}
+</style>
+<script language="javascript">
+
+function genImage() {
+    var url = document.location.protocol + '//' + document.location.host + '/status/' + document.getElementById('jid').value;
+    document.getElementById('img').src = url;
+    document.getElementById('url').innerHTML = 'Your image url is : <a href="'+url + '" target=_blank >' + url + '</a>';
+}
+
+</script>
+<body>
+
+<h3>A simple presence bot</h3>
+
+1) Add %(JABBER_USER)s to your jabber/gtalk contacts
+<br><br>
+2) what is your gmail/jabber username ? : <input type=text id=jid value="user@gmail.com"><button onclick="genImage()">generate image</button>
+<br><br>status : <img id="img" src="/static/offline_16.png"/>&nbsp;&nbsp;&nbsp;<span id='url'></span>
+<br><br><b>Note : </b>If you suscribe the BOT, your status become publically available at the below url
+
+<br><br><br>
+Documentation and source code : <a href='http://github.com/revolunet/jabber-presencebot'>http://github.com/revolunet/jabber-presencebot</a>
+</body>
