@@ -7,7 +7,10 @@ import thread
 import BaseHTTPServer 
 import xmpp
 import cgi
-import simplejson as json
+try:
+    import json
+except:
+    import simplejson as json
 
 import settings
 
@@ -100,16 +103,25 @@ class HTTPJabberGateway(BaseHTTPServer.BaseHTTPRequestHandler):
     self.end_headers()
     self.wfile.write(response)
 
+  def ImgResponse(self, inImg):
+    ext = os.path.splitext(inImg)[1][1:].lower()
+    data = open(inImg, 'rb').read()
+    self.send_response(200)
+    self.send_header("Content-type", 'image/%s' % ext)
+    self.send_header("Content-length", len(data))
+    self.end_headers()
+    self.wfile.write(data)
+    
   def do_GET(self):
     path = self.path[:self.path.find('?')]
     qs = self.path[self.path.find('?')+1:]
     qs = cgi.parse_qs(qs)
     
     #
-    # list users and status with JSON
     # /users?pwd=ADMIN_PASSWORD
     # /user/test@revolunet.com?pwd=ADMIN_PASSWORD
-    # /send?pwd=ADMIN_PASSWORD&jid=test@revolunet.com&msg=blalab%20balbal
+    # /user/test@revolunet.com?pwd=ADMIN_PASSWORD                           # return settings.ONLINE_IMG | OFFLINE_IMG
+    # /send?jid=test@revolunet.com&msg=blalab%20balbal&pwd=ADMIN_PASSWORD
     #
     
     if qs.get('pwd',[''])[0] == settings.ADMIN_PASSWORD:
@@ -122,12 +134,18 @@ class HTTPJabberGateway(BaseHTTPServer.BaseHTTPRequestHandler):
             msg = qs.get('msg',[''])[0]
             self.jabberCon.sendMsg( jid, msg)
             self.JsonResponse({'success':True})
-            
         elif path.startswith('/user/'):
             paths = path[1:].split('/')
             data = self.jabberCon.getUserStatus(paths[-1])
             self.JsonResponse({'status':data})
-        
+        elif path.startswith('/status/'):
+            paths = path[1:].split('/')
+            if self.jabberCon.getUserStatus(paths[-1]) == 'online':
+                self.ImgResponse( settings.ONLINE_IMG )
+            else:
+                self.ImgResponse( settings.OFFLINE_IMG )
+                #self.JsonResponse({'status':data})
+       
         
     self.JsonResponse({'success':False})
     return True
