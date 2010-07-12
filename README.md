@@ -20,7 +20,9 @@ There is a working bot here : [http://status.revolunet.com][2]
 
   - /user/aaa@gmail.com : return user aaa@gmail.com status as json
   - /status/aaa@gmail.com : return user aaa@gmail.com status as an image
- - /status/aaa@gmail.com,bbb@gmail.com,ccc@gmail.com :  return 'online' status image if one of these users or more is online.
+  - /status/aaa@gmail.com,bbb@gmail.com,ccc@gmail.com :  return 'online' status image if one of these users or more is online.
+  
+  - the 'status' command can have 2 more params : on and off which are the online and offline image which will be displayed instead of the default.
 
 
 **dependencies :** 

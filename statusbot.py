@@ -113,7 +113,6 @@ class HTTPJabberGateway(BaseHTTPServer.BaseHTTPRequestHandler):
         self.send_header("Content-length", len(data))
         self.end_headers()
         self.wfile.write(data)
-    
   def HtmlResponse(self, file):
     context = {
         'JABBER_USER':'%s@%s' % (settings.JABBER_USER, settings.JABBER_DOMAIN)
@@ -127,6 +126,11 @@ class HTTPJabberGateway(BaseHTTPServer.BaseHTTPRequestHandler):
         self.send_header("Content-length", len(data))
         self.end_headers()
         self.wfile.write(data)
+        
+  def redirect(self, uri, code = 301):
+        self.send_response( code )
+        self.send_header("Location", uri)
+        self.end_headers()
         
   def do_GET(self):
     isqs = self.path.find('?')    
@@ -173,10 +177,17 @@ class HTTPJabberGateway(BaseHTTPServer.BaseHTTPRequestHandler):
                 jid = jid.lower()
                 if self.jabberCon.getUserStatus(jid) == 'online':
                     online = True
+
             if online == True:
-                return self.ImgResponse( settings.ONLINE_IMG )
+                if qs.get('on',[''])[0] !='':
+                    self.redirect(qs.get('on',[''])[0])
+                else:
+                    return self.ImgResponse( settings.ONLINE_IMG )
             else:
-                return self.ImgResponse( settings.OFFLINE_IMG )
+                if qs.get('off',[''])[0] !='':
+                    self.redirect(qs.get('off',[''])[0])
+                else:
+                    return self.ImgResponse( settings.OFFLINE_IMG )
         else:
             self.JsonResponse({'success':False})
     elif path.startswith('/static/'):
