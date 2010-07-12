@@ -12,3 +12,7 @@ JABBER_PWD = 'blabla'
 # The bot http server
 HTTP_HOST = '0.0.0.0'
 HTTP_PORT = 5225
+
+# default status images
+ONLINE_IMG = os.path.join( 'static', 'online_16.png' )
+OFFLINE_IMG = os.path.join( 'static', 'offline_16.png' )

@@ -42,7 +42,11 @@ class StatusBot(object):
         return False
         
     def getUserStatus(self, jid):
-        return self.isAvailable(jid) and 'online' or 'offline'
+        try:
+            return self.isAvailable(jid) and 'online' or 'offline'
+        except:
+            print 'StatusBot getUserStatus EXCEPTION'
+            return 'offline'
     
     def sendMsg(self, jid, msg):
         self.client.send(xmpp.protocol.Message(jid, msg))
@@ -110,6 +114,7 @@ class HTTPJabberGateway(BaseHTTPServer.BaseHTTPRequestHandler):
     self.send_header("Content-type", 'image/%s' % ext)
     self.send_header("Content-length", len(data))
     self.end_headers()
+    
     self.wfile.write(data)
     
   def do_GET(self):
@@ -126,25 +131,37 @@ class HTTPJabberGateway(BaseHTTPServer.BaseHTTPRequestHandler):
     
     if qs.get('pwd',[''])[0] == settings.ADMIN_PASSWORD:
         if path == '/users':
+            # list known users
             data = self.jabberCon.getStatus()
             self.JsonResponse({'users':data})
-            
         elif path == '/send':
+            # send msg to specific user
             jid = qs.get('jid',[''])[0]
             msg = qs.get('msg',[''])[0]
             self.jabberCon.sendMsg( jid, msg)
             self.JsonResponse({'success':True})
         elif path.startswith('/user/'):
+            # display user status
             paths = path[1:].split('/')
-            data = self.jabberCon.getUserStatus(paths[-1])
+            jid = paths[-1]
+            data = self.jabberCon.getUserStatus(jid)
             self.JsonResponse({'status':data})
-        elif path.startswith('/status/'):
+        elif path.startswith('/status'):
+            # display user(s) status with an icon
             paths = path[1:].split('/')
-            if self.jabberCon.getUserStatus(paths[-1]) == 'online':
-                self.ImgResponse( settings.ONLINE_IMG )
-            else:
-                self.ImgResponse( settings.OFFLINE_IMG )
-                #self.JsonResponse({'status':data})
+            if len(paths) == 2:
+                # specific user
+                
+                users = paths[-1].split(',')
+                online = False
+                for jid in users:
+                    if self.jabberCon.getUserStatus(jid) == 'online':
+                        online = True
+                if online == True:
+                    self.ImgResponse( settings.ONLINE_IMG )
+                else:
+                    self.ImgResponse( settings.OFFLINE_IMG )
+            
        
         
     self.JsonResponse({'success':False})
