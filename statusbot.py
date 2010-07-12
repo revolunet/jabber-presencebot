@@ -131,8 +131,8 @@ class HTTPJabberGateway(BaseHTTPServer.BaseHTTPRequestHandler):
   def do_GET(self):
     isqs = self.path.find('?')    
     path = self.path
-    if isqs > -1:
-        path = isqs[:isqs]
+    if isqs > 0:
+        path = path[:isqs]
     qs = self.path[self.path.find('?')+1:]
     qs = cgi.parse_qs(qs)
     
