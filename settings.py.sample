@@ -1,7 +1,9 @@
 import os
 
 BASE_DIR = os.path.realpath(os.path.dirname(__file__))
+STATIC_DIR = os.path.join(STATIC_DIR, 'static')
 
+DEBUG = True
 
 # Password to access user list and status
 ADMIN_PASSWORD = 'pouetpouet'
@@ -18,5 +20,5 @@ HTTP_HOST = '0.0.0.0'
 HTTP_PORT = 5225
 
 # default status images
-ONLINE_IMG = os.path.join( 'static', 'online_16.png' )
-OFFLINE_IMG = os.path.join( 'static', 'offline_16.png' )
+ONLINE_IMG = os.path.join( STATIC_DIR, 'online_16.png' )
+OFFLINE_IMG = os.path.join( STATIC_DIR, 'offline_16.png' )

@@ -15,7 +15,7 @@ import settings
 
 class StatusBot(object):
     def __init__(self):
-        self.client = xmpp.Client(settings.JABBER_DOMAIN, debug = False )
+        self.client = xmpp.Client(settings.JABBER_DOMAIN, debug = settings.DEBUG) 
         self.client.connect( (settings.JABBER_HOST ,settings.JABBER_PORT) )
         self.client.auth(settings.JABBER_USER, settings.JABBER_PWD, 'python')
         self.client.sendInitPresence()
