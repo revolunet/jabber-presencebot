@@ -1,23 +1,38 @@
-revolunet statusbot
-===================
+jabber-presencebot
+==================
 
 A simple Python/Jabber BOT that tracks online user presence.
 
 Users add the bot to their roster and their status are then tracked.
 
-The bot offers an http/json interface to query user statuses. results are JSON or images
+The bot offers an http/json interface to query user statuses. results are JSON or images.
 
- * AUTHENTICATED COMMANDS : 
+There is a working bot here : [http://status.revolunet.com][2]
+
+**admin commands :** 
+
+*theses commands need the pwd GET parameter (set in config)*
+
+  - /users :    return the full roster with user status as json
+  - /send?msg=blabla%20blabla&jid=aaa@gmail.com :  send a jabber message to aaa@gmail.com
+
+**public commands :**
+
+  - /user/aaa@gmail.com : return user aaa@gmail.com status as json
+  - /status/aaa@gmail.com : return user aaa@gmail.com status as an image
+ - /status/aaa@gmail.com,bbb@gmail.com,ccc@gmail.com :  return 'online' status image if one of these users or more is online.
+
+
+**dependencies :** 
+
+ * [xmpppy][1] 
+ * python-simplejson
  
-/users                                              return the full roster with user status (online/offlince)
-/send?msg=blabla%20blabla&jid=aaa@gmail.com         send jabber message to aaa@gmail.com
 
- * ANONYMOUS COMMANDS : 
+**authors**
 
-/user/aaa@gmail.com                                   return user aaa@gmail.com status (online/offline)
-/status/aaa@gmail.com                                 return user aaa@gmail.com status (online/offline) as an image
-/status/aaa@gmail.com,bbb@gmail.com,ccc@gmail.com     return 'online' status if any of these users is online
+ * Julien Bouquillon (revolunet) julien@bouquillon.com
 
-all the commands must use GET and pwd passed
 
-dependencies : xmpppy http://xmpppy.sourceforge.net/
+  [1]: http://xmpppy.sourceforge.net/
+  [2]: http://status.revolunet.com
