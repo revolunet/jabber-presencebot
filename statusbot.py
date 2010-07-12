@@ -7,7 +7,7 @@ import thread
 import BaseHTTPServer 
 import xmpp
 import cgi
-import json
+import simplejson as json
 
 import settings
 
@@ -24,17 +24,26 @@ class StatusBot(object):
     def getStatus(self):
         # return a dict containing users and status from roster data
         data = {}
-        roster = self.client.getRoster()
-        users = roster.getItems()
-        for user in users:
-            status = 'offline'
-            show =  roster.getShow(user)
-            ress = roster.getResources(user)
-            if len(ress)> 0 and show in [None, 'online', 'available']:
-                status = 'online'
-            data[user] = status
+        for jid in self.client.getRoster().getItems():
+            status = self.getUserStatus(jid)
+            data[jid] = status
         return data
+        
+    def isAvailable(self, jid):
+        # Bool
+        roster = self.client.getRoster()
+        show = roster.getShow(jid)
+        ress =  roster.getResources(jid)
+        if len(ress)> 0 and show in [None, 'online', 'available']:
+            return True
+        return False
+        
+    def getUserStatus(self, jid):
+        return self.isAvailable(jid) and 'online' or 'offline'
     
+    def sendMsg(self, jid, msg):
+        self.client.send(xmpp.protocol.Message(jid, msg))
+        return True
         
     def presenceHandler(self, conn, node):
         fromJID = node.getFrom().getStripped()
@@ -86,7 +95,7 @@ class HTTPJabberGateway(BaseHTTPServer.BaseHTTPRequestHandler):
   def JsonResponse(self, data):
     response = json.dumps(data)
     self.send_response(200)
-    self.send_header("Content-type", 'text/json')
+    self.send_header("Content-type", 'application/json')
     self.send_header("Content-length", len(response))
     self.end_headers()
     self.wfile.write(response)
@@ -99,15 +108,29 @@ class HTTPJabberGateway(BaseHTTPServer.BaseHTTPRequestHandler):
     #
     # list users and status with JSON
     # /users?pwd=ADMIN_PASSWORD
+    # /user/test@revolunet.com?pwd=ADMIN_PASSWORD
+    # /send?pwd=ADMIN_PASSWORD&jid=test@revolunet.com&msg=blalab%20balbal
     #
     
     if qs.get('pwd',[''])[0] == settings.ADMIN_PASSWORD:
         if path == '/users':
             data = self.jabberCon.getStatus()
             self.JsonResponse({'users':data})
-
+            
+        elif path == '/send':
+            jid = qs.get('jid',[''])[0]
+            msg = qs.get('msg',[''])[0]
+            self.jabberCon.sendMsg( jid, msg)
+            self.JsonResponse({'success':True})
+            
+        elif path.startswith('/user/'):
+            paths = path[1:].split('/')
+            data = self.jabberCon.getUserStatus(paths[-1])
+            self.JsonResponse({'status':data})
+        
+        
     self.JsonResponse({'success':False})
-  
+    return True
 
 def start():
     jabber = StatusBot()
