@@ -7,10 +7,7 @@ import thread
 import BaseHTTPServer 
 import xmpp
 import cgi
-try:
-    import json
-except:
-    import simplejson as json
+import simplejson as json
 
 import settings
 

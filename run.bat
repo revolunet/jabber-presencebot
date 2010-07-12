@@ -1,4 +1,4 @@
 
 cd %~dp0
 
-c:\python26\python.exe statusbot.py
+c:\python25\python.exe statusbot.py
