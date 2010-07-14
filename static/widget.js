@@ -59,10 +59,12 @@ var statusWidget = {
     }
     ,receiveStatus:function(json) {
         if (json.status.online === true) {
+            if (this.status == 'online') return;
             this.status = 'online';
             this.onOnline();
         }
         else {
+            if (this.status == 'offline') return;
             this.status = 'offline';
             this.onOffline();
         }
