@@ -1,26 +1,76 @@
-<title>status.revolunet.com presence bot</title>
-<style>
- body {font-size: 16px}
-</style>
-<script language="javascript">
+<html>
 
-function genImage() {
-    var url = document.location.protocol + '//' + document.location.host + '/imgstatus/' + document.getElementById('jid').value;
-    document.getElementById('img').src = url;
-    document.getElementById('url').innerHTML = 'Your image url is : <a href="'+url + '" target=_blank >' + url + '</a>';
+
+<script type="text/javascript"> 
+function go() {
+    statusWidget_config.jids = document.getElementById('jids').value.split(',');
+    statusWidget.init();
 }
 
 </script>
 <body>
 
-<h3>A simple presence bot</h3>
+<h1>revolunet presenceBot widget test</H1>
+First, add status@revolunet to your roster<br><br>
+Create your online status badge :<br><br>
+<input type=text  id='jids' size=50 value="admin@revolunet.com,test@test.com" /><button onclick="go()">generate widget</button>
 
-1) Add %(JABBER_USER)s to your jabber/gtalk contacts
 <br><br>
-2) what is your gmail/jabber username ? : <input type=text id=jid value="user@gmail.com"><button onclick="genImage()">generate image</button>
-<br><br>status : <img id="img" src="/static/offline_16.png"/>&nbsp;&nbsp;&nbsp;<span id='url'></span>
-<br><br><b>Note : </b>If you suscribe the BOT, your status become publically available at the below url
+<div id='eDemoWidget'>widget will come here</div>
 
-<br><br><br>
-Documentation and source code : <a href='http://github.com/revolunet/jabber-presencebot'>http://github.com/revolunet/jabber-presencebot</a>
+<!-- START _config WIDGET --> 
+<script type="text/javascript"> 
+ 
+// OPTIONAL CONFIG PARAMS
+var statusWidget_config = {
+    target:'eDemoWidget'
+    ,jids:['admin@revolunet.com', 'test@test.com']
+    ,offUrl:'/contact.php'  
+    ,onUrl:'http://revolunet.com/chat'
+ }
+ 
+</script> 
+<style>
+/* OPTIONAL CSS */
+#statusWidget {
+    right:300px;
+    top:20px;
+    border:2px solid red;
+    width:115px;
+}
+
+pre {
+    font-family:courier;
+    font-size:12px;
+}
+</style>
+<script type="text/javascript" src="widget.js"></script>
+<!-- END _config WIDGET -->
+<br><br>
+<b>Example code : </b>
+<pre id="code">
+
+    &lt;div id='eDemoWidget'&gt;widget will come here&lt;/div&gt;
+
+    &lt;!-- START _config WIDGET --&gt; 
+    
+    &lt;script type="text/javascript"&gt; 
+     
+    // OPTIONAL CONFIG PARAMS
+    var statusWidget_config = {
+        target:'eDemoWidget'
+        ,jids:['admin@revolunet.com', 'test@test.com']
+        ,offUrl:'/contact.php'  
+        ,onUrl:'http://revolunet.com/chat'
+     }
+     
+    &lt;/script&gt; 
+
+    &lt;/style&gt;
+    &lt;script type="text/javascript" src="http://status.revolunet.com/widget.js"&gt;&lt;/script&gt;
+    
+    &lt;!-- END _config WIDGET --&gt;
+
+</pre>
+
 </body>

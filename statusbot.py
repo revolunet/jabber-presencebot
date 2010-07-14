@@ -130,7 +130,7 @@ class HTTPJabberGateway(BaseHTTPServer.BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(data)
         
-  def HtmlResponse(self, file):
+  def HtmlResponse(self, file, ctype = 'text/html'):
     context = {
         'JABBER_USER':'%s@%s' % (settings.JABBER_USER, settings.JABBER_DOMAIN)
         ,'OFFLINE_IMG':settings.OFFLINE_IMG
@@ -139,7 +139,7 @@ class HTTPJabberGateway(BaseHTTPServer.BaseHTTPRequestHandler):
         data = open(file, 'r').read()
         data = data % context
         self.send_response(200)
-        self.send_header("Content-type", 'text/html')
+        self.send_header("Content-type", ctype)
         self.send_header("Content-length", len(data))
         self.end_headers()
         self.wfile.write(data)
@@ -203,6 +203,10 @@ class HTTPJabberGateway(BaseHTTPServer.BaseHTTPRequestHandler):
                 return self.ImgResponse( os.path.join(settings.STATIC_DIR, file) )
         elif ext in 'html,htm'.split(','):
                 return self.HtmlResponse( os.path.join(settings.STATIC_DIR, file) )
+    elif path == '/widget.js':
+        # special :/
+        return self.HtmlResponse( os.path.join(settings.STATIC_DIR, 'widget.js') , ctype='text/javascript')
+        
     else:
         return self.HtmlResponse( os.path.join(settings.STATIC_DIR, 'home.html') )
 
