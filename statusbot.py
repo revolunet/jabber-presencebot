@@ -110,10 +110,12 @@ class HTTPJabberGateway(BaseHTTPServer.BaseHTTPRequestHandler):
 
   def JsonResponse(self, data, callback = None):
     response = json.dumps(data)
+    ctype = 'application/json'
     if callback and callback != '':
         response = u"%s(%s);"  %( callback, response )
+        ctype = 'text/javascript'
     self.send_response(200)
-    self.send_header("Content-type", 'application/json')
+    self.send_header("Content-type", ctype)
     self.send_header("Content-length", len(response))
     self.end_headers()
     self.wfile.write(response)
