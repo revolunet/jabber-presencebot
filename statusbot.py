@@ -21,35 +21,47 @@ class StatusBot(object):
         self.client.sendInitPresence()
         self.client.RegisterHandler('presence', self.presenceHandler)
         
-    def getStatus(self):
-        # return a dict containing users and status from roster data
-        data = {}
+    def getStatus(self, jids = []):
+        # return a dict containing global status and detail on given jids
+        data = {
+            'online': False
+            ,'details':{}
+        }
+   
         for jid in self.client.getRoster().getItems():
-            status = self.getUserStatus(jid)
-            data[jid] = status
+            if not jids or jid in jids:
+                status = self.isAvailable(jid)
+                data['details'][jid] = status
+                if status:
+                    data['online'] = True
+                    
+        for jid in jids:
+            if not jid in data['details'].keys():
+                data['details'][jid] = False
+                
         return data
         
     def isAvailable(self, jid):
         # Bool
+        # Return true if one jid online
         roster = self.client.getRoster()
-        show = roster.getShow(jid)
-        ress =  roster.getResources(jid)
-        if len(ress)> 0 and show in [None, 'online', 'available']:
-            return True
+        jids = jid.split(',')
+        status = False
+        for ajid in jids:
+            show = roster.getShow(ajid)
+            ress =  roster.getResources(ajid)
+            if len(ress)> 0 and show in [None, 'online', 'available']:
+                return True
         return False
         
-    def getUserStatus(self, jid):
-        try:
-            return self.isAvailable(jid) and 'online' or 'offline'
-        except:
-            print 'StatusBot getUserStatus EXCEPTION'
-            return 'offline'
-    
+
     def sendMsg(self, jid, msg):
+        # sends a jabber message (text)
         self.client.send(xmpp.protocol.Message(jid, msg))
         return True
         
     def presenceHandler(self, conn, node):
+        # handles presences and subscriptions requests
         fromJID = node.getFrom().getStripped()
         presType = node.getType()
 
@@ -65,7 +77,7 @@ class StatusBot(object):
                 self.client.sendPresence(jid=fromJID, typ='unsubscribed')
                 self.client.sendPresence(jid=fromJID, typ='unsubscribe')
 
-        roster = self.client.getRoster()
+        #roster = self.client.getRoster()
         
         
       
@@ -96,8 +108,10 @@ class HTTPgateway(object):
 class HTTPJabberGateway(BaseHTTPServer.BaseHTTPRequestHandler):
   jabberCon = None
 
-  def JsonResponse(self, data):
+  def JsonResponse(self, data, callback = None):
     response = json.dumps(data)
+    if callback and callback != '':
+        response = u"%s(%s);"  %( callback, response )
     self.send_response(200)
     self.send_header("Content-type", 'application/json')
     self.send_header("Content-length", len(response))
@@ -113,6 +127,7 @@ class HTTPJabberGateway(BaseHTTPServer.BaseHTTPRequestHandler):
         self.send_header("Content-length", len(data))
         self.end_headers()
         self.wfile.write(data)
+        
   def HtmlResponse(self, file):
     context = {
         'JABBER_USER':'%s@%s' % (settings.JABBER_USER, settings.JABBER_DOMAIN)
@@ -140,62 +155,47 @@ class HTTPJabberGateway(BaseHTTPServer.BaseHTTPRequestHandler):
     qs = self.path[self.path.find('?')+1:]
     qs = cgi.parse_qs(qs)
     
-   # print path, qs
-    #
-    # /users?pwd=ADMIN_PASSWORD
-    # /user/test@revolunet.com?pwd=ADMIN_PASSWORD
-    # /user/test@revolunet.com?pwd=ADMIN_PASSWORD                           # return settings.ONLINE_IMG | OFFLINE_IMG
-    # /send?jid=test@revolunet.com&msg=blalab%20balbal&pwd=ADMIN_PASSWORD
-    #
-    
+ 
     if qs.get('pwd',[''])[0] == settings.ADMIN_PASSWORD:
         if path == '/users':
             # list known users
             data = self.jabberCon.getStatus()
-            return self.JsonResponse({'users':data})
+            return self.JsonResponse({'users':data}, qs.get('callback',[''])[0])
         elif path == '/send':
             # send msg to specific user
             jid = qs.get('jid',[''])[0].lower()
             msg = qs.get('msg',[''])[0]
             self.jabberCon.sendMsg( jid, msg)
-            return self.JsonResponse({'success':True})
-    elif path.startswith('/user/'):
-        # display user status
-        paths = path[1:].split('/')
-        jid = paths[-1].lower()
-        data = self.jabberCon.getUserStatus(jid)
-        return self.JsonResponse({'status':data})
+            return self.JsonResponse({'success':True}, qs.get('callback',[''])[0])
     elif path.startswith('/status/'):
-        # display user(s) status with an icon
+        # JSON user(s) status
         paths = path[1:].split('/')
-        if len(paths) == 2:
-            # specific user
-            users = paths[-1].split(',')
-            online = False
-            for jid in users:
-                #print "check", jid
-                jid = jid.lower()
-                if self.jabberCon.getUserStatus(jid) == 'online':
-                    online = True
+        jids = paths[-1].lower()
+        data = self.jabberCon.getStatus( jids.split(',') )
+        return self.JsonResponse({'status':data}, qs.get('callback',[''])[0])
+    elif path.startswith('/imgstatus/'):
+        # Image user(s) status
+        paths = path[1:].split('/')
+        jids = paths[-1].lower()
+        data = self.jabberCon.getStatus( jids.split(',') )
 
-            if online == True:
-                if qs.get('on',[''])[0] !='':
-                    self.redirect(qs.get('on',[''])[0])
-                else:
-                    return self.ImgResponse( settings.ONLINE_IMG )
+        if data['online'] == True:
+            if qs.get('on',[''])[0] !='':
+                self.redirect(qs.get('on',[''])[0])
             else:
-                if qs.get('off',[''])[0] !='':
-                    self.redirect(qs.get('off',[''])[0])
-                else:
-                    return self.ImgResponse( settings.OFFLINE_IMG )
+                return self.ImgResponse( settings.ONLINE_IMG )
         else:
-            self.JsonResponse({'success':False})
+            if qs.get('off',[''])[0] !='':
+                self.redirect(qs.get('off',[''])[0])
+            else:
+                return self.ImgResponse( settings.OFFLINE_IMG )
+                
     elif path.startswith('/static/'):
+        # static files
         file = path[8:]
         file = file.replace('..', '')
         file = file.replace('/', '')
         file = file.replace('\\', '')
-      #  print 'read ', file
         ext = file.lower()[file.rfind('.')+1:]
         if ext in 'jpg,jpeg,gif,png'.split(','):
                 return self.ImgResponse( os.path.join(settings.STATIC_DIR, file) )

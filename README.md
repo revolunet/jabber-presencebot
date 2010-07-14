@@ -18,12 +18,14 @@ There is a working bot here : [http://status.revolunet.com][2]
 
 **public commands :**
 
-  - /user/aaa@gmail.com : return user aaa@gmail.com status as json
-  - /status/aaa@gmail.com : return user aaa@gmail.com status as an image
-  - /status/aaa@gmail.com,bbb@gmail.com,ccc@gmail.com :  return 'online' status image if one of these users or more is online.
+  - /status/aaa@gmail.com : return user aaa@gmail.com status as json
+  - /status/aaa@gmail.com,bbb@gmail.com,ccc@gmail.com :  return 'online' status as json
+  - /imgstatus/aaa@gmail.com : display online image if this user online
+  - /imgstatus/aaa@gmail.com,bbb@gmail.com : display online image if one of this user online
   
-  - the 'status' command can have 2 more params : on and off which are the online and offline image which will be displayed instead of the default.
-
+  - the 'imgstatus' commannd takes two optional params : on and off which are the online and offline image which will be displayed instead of the default.
+  - Json command have a 'callback' optional parameters that you can use to cross-domain include this result in your applications. (remote script include)
+  
 
 **dependencies :** 
 
