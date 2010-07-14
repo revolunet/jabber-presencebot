@@ -31,7 +31,7 @@ There is a working bot here : [http://status.revolunet.com][2]
 
 **JS API Example :** 
 
-    - See [http://status.revolunet.com][2] for a full working bot and widget demo
+  - See [http://status.revolunet.com][2] for a full working bot and widget demo
     
     
 **dependencies :** 
