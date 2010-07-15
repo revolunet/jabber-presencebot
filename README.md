@@ -11,7 +11,7 @@ There is also a JS API to display your team jabber status and redirect users acc
 
 There is a working bot here : [http://status.revolunet.com][2]
 
-You can also use client.py on remote servers to track their status
+You can also use client.py on remote servers to track their status (add this script to your @reboot cron command)
 
 
 **usage :**
