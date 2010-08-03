@@ -20,6 +20,11 @@ class StatusBot(object):
         self.client.auth(settings.JABBER_USER, settings.JABBER_PWD, 'python')
         self.client.sendInitPresence()
         self.client.RegisterHandler('presence', self.presenceHandler)
+        self.client.RegisterDisconnectHandler( self.disconnectHandler )
+        
+    def disconnectHandler(self):
+        print 'deconnected, reconnect'
+        self.client.reconnectAndReauth()
         
     def getStatus(self, jids = []):
         # return a dict containing global status and detail on given jids
