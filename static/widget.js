@@ -30,12 +30,14 @@ var statusWidget = {
     config:null
     ,loaded:false
     ,req:null
-    ,status:'offline'
+    ,status:null
     ,init:function() {
+       
         if (!document.readyState == 'complete') {
             setTimeout(statusWidget.init, 250);
             return;
         }
+  
         this.loaded = true;
         // config
         this.config = {
@@ -50,14 +52,13 @@ var statusWidget = {
         if (typeof(statusWidget_config) == 'object') {
             for (a in statusWidget_config) {
                 this.config[a] = statusWidget_config[a]
-                //console.log(a, eDemo_config[a]);
             }
         }
  
        this.initStatus( );
 
     }
-    ,receiveStatus:function(json) {
+    ,receiveStatus:function(json) { 
         if (json.status.online === true) {
             if (this.status == 'online') return;
             this.status = 'online';
@@ -99,7 +100,6 @@ var statusWidget = {
     ,setImage:function( url ) {
             if (this.config.target) {
                 var tgt = document.getElementById(this.config.target);
-                //alert(tgt);
                 }
             else {
                 var tgt = document.getElementById('statusWidget');
@@ -108,8 +108,8 @@ var statusWidget = {
                     div.setAttribute('id', 'statusWidget');
                     document.body.appendChild( div );
                     tgt = document.getElementById('statusWidget');
-          
-                }
+                    }
+                this.config.target = 'statusWidget';
                 }
             if (tgt) {
                 tgt.innerHTML = "<img  id='statusWidget_img', src='" + url  + "' style='cursor:pointer' onclick='statusWidget.onImageClick();' />";
