@@ -61,9 +61,19 @@ class StatusBot(object):
         
 
     def sendMsg(self, jid, msg):
-        # sends a jabber message (text)
-        self.client.send(xmpp.protocol.Message(jid, msg))
+        # sends a jabber message (text+html)
+        message = xmpp.protocol.Message(jid, msg, 'chat')
+        # if msg is HTML
+        p_html = xmpp.Node("html",{"xmlns":'http://jabber.org/protocol/xhtml-im'})
+        t1 = "<body xmlns='http://www.w3.org/1999/xhtml'>%s</body>" % msg
+        html = xmpp.simplexml.XML2Node(t1)
+        p_html.addChild(node=html)
+        message.addChild(node=p_html)
+        self.client.send(message)
         return True
+        
+         
+   
         
     def presenceHandler(self, conn, node):
         # handles presences and subscriptions requests
