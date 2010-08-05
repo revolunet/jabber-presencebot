@@ -13,6 +13,20 @@ import settings
 
 
 
+def remove_html_tags(data):
+    p = re.compile(r'<.*?>')
+    return p.sub('', data)
+    
+def remove_extra_spaces(data):
+    p = re.compile(r'\s+')
+    return p.sub(' ', data)
+    
+def html2plain(inHtml):
+    inHtml = inHtml.replace('<br>', "\n")
+    inHtml = inHtml.replace('<br/>', "\n")
+    #print inHtml
+    return remove_html_tags(inHtml)
+    
 class StatusBot(object):
     def __init__(self):
         self.client = xmpp.Client(settings.JABBER_DOMAIN, debug = settings.DEBUG) 
@@ -62,13 +76,17 @@ class StatusBot(object):
 
     def sendMsg(self, jid, msg):
         # sends a jabber message (text+html)
-        message = xmpp.protocol.Message(jid, msg, 'chat')
+        plain = html2plain(msg)
+        message = xmpp.protocol.Message(jid, plain, 'chat')
         # if msg is HTML
         p_html = xmpp.Node("html",{"xmlns":'http://jabber.org/protocol/xhtml-im'})
-        t1 = "<body xmlns='http://www.w3.org/1999/xhtml'>%s</body>" % msg
-        html = xmpp.simplexml.XML2Node(t1)
-        p_html.addChild(node=html)
-        message.addChild(node=p_html)
+        try:
+            t1 = "<body xmlns='http://www.w3.org/1999/xhtml'>%s</body>" % msg
+            html = xmpp.simplexml.XML2Node(t1)
+            p_html.addChild(node=html)
+            message.addChild(node=p_html)
+        except:
+            pass
         self.client.send(message)
         return True
         
