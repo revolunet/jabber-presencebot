@@ -252,10 +252,15 @@ def start():
     print 'http started port %s' % settings.HTTP_PORT
     while(1):
         try:
-              jabber.client.Process(1)
+		jabber.client.Process(1)
         except Exception, e:
-          print "There was an exception - ", e
-          traceback.print_exc()
+		print "There was an exception - ", e
+		traceback.print_exc()
+		if not hasattr(jabber.client, 'Process'):
+			jabber = StatusBot()
+			time.sleep(2)
+			gateway = HTTPgateway(jabber)
+			time.sleep(5)
         time.sleep(1)
 
 
