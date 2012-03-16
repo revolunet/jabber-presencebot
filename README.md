@@ -9,8 +9,6 @@ The bot offers an http/json interface to query user statuses. results are JSON o
 
 There is also a JS API to display your team jabber status and redirect users accordingly. 
 
-There is a working bot here : [http://status.revolunet.com][2]
-
 You can also use client.py on remote servers to track their status (add this script to your @reboot cron command)
 
 
@@ -39,10 +37,6 @@ You can also use client.py on remote servers to track their status (add this scr
   - Json commands have a 'callback' optional parameters that you can use to cross-domain include this result in your applications. (remote script include)
   
 
-**JS API Example :** 
-
-  - See [http://status.revolunet.com][2] for a full working bot and widget demo
-    
     
 **dependencies :** 
 
